@@ -1,9 +1,12 @@
 # Build Electron installers for DeepSeek Harness Desktop and attach them to a
-# GitHub Release. Create a Release (or publish a draft) to trigger; workflow
-# dispatch rebuilds without uploading when no release context is present.
+# GitHub Release. Pushing a version tag (e.g. 0.1.0) or publishing a Release
+# triggers the matrix; workflow_dispatch rehearses without attaching when no tag.
 name: Desktop Release
 
 on:
+  push:
+    tags:
+      - '[0-9]*'
   release:
     types: [published]
   workflow_dispatch:
@@ -76,8 +79,10 @@ jobs:
           retention-days: 14
 
       - name: Attach to GitHub Release
-        if: github.event_name == 'release'
+        # Tag push creates/updates the Release; release events attach to the published one.
+        if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.release.tag_name || github.ref_name }}
           files: ${{ matrix.artifact_glob }}
           fail_on_unmatched_files: true

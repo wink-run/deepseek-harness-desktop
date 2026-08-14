@@ -28,7 +28,7 @@ pnpm run desktop
 
 桌面壳会在回环地址上启动嵌套的 `dsh web`，并打开原生窗口。详见 [`apps/desktop/README.md`](apps/desktop/README.md)。
 
-本仓库的 GitHub Releases 会通过 [Desktop Release](.github/workflows/desktop-release.yml) 构建并挂载 macOS／Linux／Windows 安装包。
+本仓库的 GitHub Releases 会在推送版本 tag（如 `0.1.0`）或发布 Release 时，通过 [Desktop Release](.github/workflows/desktop-release.yml) 构建并挂载 macOS／Linux／Windows 安装包。
 
 若只需浏览器 UI：
 

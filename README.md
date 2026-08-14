@@ -28,7 +28,7 @@ pnpm run desktop
 
 The desktop shell starts nested `dsh web` on loopback and opens a native window. See [`apps/desktop/README.md`](apps/desktop/README.md).
 
-GitHub Releases on this repository build and attach macOS / Linux / Windows installers via [Desktop Release](.github/workflows/desktop-release.yml).
+GitHub Releases on this repository build and attach macOS / Linux / Windows installers via [Desktop Release](.github/workflows/desktop-release.yml) when you push a version tag (e.g. `0.1.0`) or publish a Release.
 
 For the browser UI only:
 
