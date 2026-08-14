@@ -5,6 +5,8 @@
  */
 
 import { app, BrowserWindow, shell } from 'electron'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { resolveDesktopRuntimePaths } from './runtime-paths.ts'
 import { spawnWeb, type WebChild } from './spawn-web.ts'
 
@@ -12,6 +14,9 @@ import { spawnWeb, type WebChild } from './spawn-web.ts'
 let mainWindow: BrowserWindow | undefined
 /** Live web child; killed on quit. */
 let webChild: WebChild | undefined
+
+/** Packaged / source-tree path of the DeepSeek fish app icon. */
+const appIconPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'build', 'icon.png')
 
 /**
  * Create the product window and load the announced loopback URL.
@@ -23,7 +28,8 @@ function openWindow(url: string): void {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: 'DeepSeek Harness',
+    title: 'DeepSeek Harness Desktop',
+    icon: appIconPath,
     show: false,
     webPreferences: {
       // The page is the same origin as loopback `dsh web`; no preload bridge.
