@@ -1,0 +1,90 @@
+{
+  "name": "@deepseek-ai/dsh-desktop",
+  "description": "Electron shell that boots dsh web on loopback and opens a native window",
+  "version": "0.1.0-rc.5",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "directory": "apps/desktop"
+  },
+  "type": "module",
+  "main": "lib/main.js",
+  "bin": {
+    "dsh-desktop": "lib/bin.js"
+  },
+  "files": [
+    "lib/*.js"
+  ],
+  "scripts": {
+    "build": "tsc -b && tsdown",
+    "start": "electron .",
+    "pack": "pnpm run build && electron-builder --dir",
+    "dist": "pnpm run build && electron-builder"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@deepseek-ai/dsh": "workspace:^",
+    "electron": "^36.4.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^26.0.12",
+    "tsdown": "^0.21.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "build": {
+    "appId": "com.deepseek.dsh",
+    "productName": "DeepSeek Harness",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "lib/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../cli/lib",
+        "to": "dsh-cli",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../cli/config",
+        "to": "dsh-cli-config",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../web/dist",
+        "to": "dsh-web-dist",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Development"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}

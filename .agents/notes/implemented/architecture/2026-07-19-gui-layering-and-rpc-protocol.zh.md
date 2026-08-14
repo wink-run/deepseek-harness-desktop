@@ -30,10 +30,10 @@ Status: implemented
 - `apps/` 作为对外导出的应用入口，可以由 Client / Host 混合组装。
     - `apps/web`（`dsh-web-frontend`）是 vite 应用：`dsh-client-web` 导出的壳 API 之上的一层薄 `main.ts`。
     - `apps/cli`（`@deepseek-ai/dsh`）分发命令：`dsh web` = Host + webserver + 构建出的 `dsh-web-frontend` dist；`dsh --profile headless` = [直接使用核心 Agent／Session 的入口](2026-08-09-headless-direct-core-entry-point.md)，不含 Host、HTTP 或浏览器层。
-    - 将来的 Electron 应用经由 IPC fetch 载体复用同一套 web client 包。
+    - `apps/desktop`（`@deepseek-ai/dsh-desktop`）是已交付的 Electron 壳：它启动回环上的 `dsh web` 并打开原生窗口（[桌面壳说明](../feature/2026-08-14-desktop-electron-loopback-shell.md)）。基于 `file://` 的 IPC fetch 载体仍是预留的非 HTTP Electron 设计。
 
 ```
-apps/*  (applications: apps/web = vite app, apps/cli = bin dispatch)
+apps/*  (applications: apps/web = vite app, apps/cli = bin dispatch, apps/desktop = Electron shell)
   │ consume
   ▼
 packages/host/*                      packages/client/*
