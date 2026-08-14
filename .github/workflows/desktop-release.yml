@@ -37,11 +37,9 @@ jobs:
           - name: macOS
             os: macos-latest
             electron_args: --mac
-            artifact_glob: 'apps/desktop/release/*.{dmg,zip,yml,yaml,blockmap}'
           - name: Windows
             os: windows-latest
             electron_args: --win
-            artifact_glob: 'apps/desktop/release/*.{exe,yml,yaml,blockmap}'
 
     steps:
       - uses: actions/checkout@v6
@@ -71,11 +69,25 @@ jobs:
         # Call the local bin directly — `pnpm exec` re-ran `install --production` on CI.
         run: node ./node_modules/electron-builder/cli.js ${{ matrix.electron_args }} --publish never
 
+      # upload-artifact / softprops follow .gitignore; apps/desktop/release/ is ignored,
+      # so stage installers into a non-ignored directory before upload/attach.
+      - name: Stage installers for upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p desktop-ci-artifacts
+          find apps/desktop/release -maxdepth 1 -type f \( \
+            -name '*.dmg' -o -name '*.zip' -o -name '*.exe' -o \
+            -name '*.yml' -o -name '*.yaml' -o -name '*.blockmap' \
+          \) -print -exec cp {} desktop-ci-artifacts/ \;
+          ls -la desktop-ci-artifacts
+          test "$(find desktop-ci-artifacts -type f | wc -l)" -gt 0
+
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
           name: desktop-${{ matrix.name }}
-          path: ${{ matrix.artifact_glob }}
+          path: desktop-ci-artifacts/*
           if-no-files-found: error
           retention-days: 14
 
@@ -85,5 +97,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.release.tag_name || github.ref_name }}
-          files: ${{ matrix.artifact_glob }}
+          files: desktop-ci-artifacts/*
           fail_on_unmatched_files: true

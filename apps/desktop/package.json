@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-desktop",
   "description": "Electron shell that boots dsh web on loopback and opens a native window",
-  "version": "0.1.0-rc.5",
+  "version": "0.1.0",
   "publishConfig": {
     "access": "public"
   },
@@ -40,6 +40,8 @@
   "build": {
     "appId": "com.deepseek.dsh.desktop",
     "productName": "DeepSeek Harness Desktop",
+    "executableName": "DeepSeekHarnessDesktop",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "release"
     },
@@ -71,12 +73,6 @@
         "zip"
       ],
       "identity": null
-    },
-    "linux": {
-      "target": [
-        "AppImage"
-      ],
-      "category": "Development"
     },
     "win": {
       "target": [
