@@ -99,3 +99,5 @@ jobs:
           tag_name: ${{ github.event.release.tag_name || github.ref_name }}
           files: desktop-ci-artifacts/*
           fail_on_unmatched_files: true
+          # One matrix leg owns the body so concurrent jobs do not race the notes.
+          body_path: ${{ matrix.name == 'macOS' && 'apps/desktop/RELEASE_NOTES.md' || '' }}

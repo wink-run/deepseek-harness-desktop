@@ -29,5 +29,5 @@ Publishing a version tag (e.g. `0.1.0`) or a GitHub Release on [wink-run/deepsee
 ## Known Limitations and Deferred Work
 
 - **Loopback HTTP, not `file://` + IPC.** The [GUI layering note](../../.agents/notes/implemented/architecture/2026-07-19-gui-layering-and-rpc-protocol.md) reserves an IPC fetch carrier for Electron; this shell deliberately keeps the existing webserver so the desktop product ships without a second transport. An IPC carrier remains future work.
-- **macOS artifacts are unsigned.** The release workflow sets `CSC_IDENTITY_AUTO_DISCOVERY=false`; Gatekeeper may require a right-click open until signing is configured.
+- **macOS artifacts are unsigned.** The release workflow sets `CSC_IDENTITY_AUTO_DISCOVERY=false`. If macOS says the app is damaged, clear quarantine then reopen: `xattr -cr /Applications/DeepSeekHarnessDesktop.app` (adjust the path if needed).
 - **Installer size tracks the full `dsh` deploy.** Packaged apps embed a production `pnpm deploy` of the CLI plus Node, so native addons match the runner OS rather than Electron's ABI.

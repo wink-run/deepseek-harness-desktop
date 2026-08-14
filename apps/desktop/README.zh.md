@@ -29,5 +29,5 @@ pnpm --filter @deepseek-ai/dsh-desktop run dist
 ## Known Limitations and Deferred Work
 
 - **回环 HTTP，而非 `file://` + IPC。** [GUI 分层说明](../../.agents/notes/implemented/architecture/2026-07-19-gui-layering-and-rpc-protocol.md) 为 Electron 预留了 IPC fetch 载体；本壳有意继续使用现有 webserver，以便在不做第二套传输的情况下交付桌面产品。IPC 载体仍属后续工作。
-- **macOS 产物未签名。** Release 工作流设置 `CSC_IDENTITY_AUTO_DISCOVERY=false`；在配置签名之前，Gatekeeper 可能需要右键打开。
+- **macOS 产物未签名。** Release 工作流设置 `CSC_IDENTITY_AUTO_DISCOVERY=false`。若系统提示应用已损坏，先清除隔离属性再打开：`xattr -cr /Applications/DeepSeekHarnessDesktop.app`（若安装路径不同请改成实际路径）。
 - **安装包体积跟随完整 `dsh` deploy。** 打包应用内嵌 CLI 的生产 `pnpm deploy` 与 Node，因此原生插件匹配 runner 操作系统，而非 Electron 的 ABI。
