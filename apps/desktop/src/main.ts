@@ -5,7 +5,8 @@
  */
 
 import { app, BrowserWindow, shell } from 'electron'
-import { resolveNodePath, spawnWeb, type WebChild } from './spawn-web.ts'
+import { resolveDesktopRuntimePaths } from './runtime-paths.ts'
+import { spawnWeb, type WebChild } from './spawn-web.ts'
 
 /** Keep a strong reference so GC cannot close the window while the app runs. */
 let mainWindow: BrowserWindow | undefined
@@ -57,8 +58,10 @@ function openWindow(url: string): void {
  * supervisors see a failed launch rather than a blank shell.
  */
 async function boot(): Promise<void> {
+  const runtime = resolveDesktopRuntimePaths(app.isPackaged, process.resourcesPath)
   const child = await spawnWeb({
-    nodePath: resolveNodePath(),
+    nodePath: runtime.nodePath,
+    dshBin: runtime.dshBin,
     cwd: process.cwd(),
   })
   webChild = child

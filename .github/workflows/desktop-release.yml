@@ -1,0 +1,83 @@
+# Build Electron installers for DeepSeek Harness Desktop and attach them to a
+# GitHub Release. Create a Release (or publish a draft) to trigger; workflow
+# dispatch rebuilds without uploading when no release context is present.
+name: Desktop Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: desktop-release-${{ github.event.release.tag_name || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  PRIMARY_NODE_VERSION: '24'
+  DSH_TELEMETRY_DISABLED: '1'
+  # Unsigned macOS artifacts; signing certs are not configured on this fork.
+  CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+  # electron-builder reads this when publishing; upload uses softprops below.
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-latest
+            electron_args: --mac
+            artifact_glob: 'apps/desktop/release/*.{dmg,zip,yml,yaml,blockmap}'
+          - name: Linux
+            os: ubuntu-24.04
+            electron_args: --linux
+            artifact_glob: 'apps/desktop/release/*.{AppImage,yml,yaml}'
+          - name: Windows
+            os: windows-latest
+            electron_args: --win
+            artifact_glob: 'apps/desktop/release/*.{exe,yml,yaml,blockmap}'
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.PRIMARY_NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install (immutable)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build harness + desktop shell
+        run: pnpm run build && pnpm --filter @deepseek-ai/dsh-desktop run build
+
+      - name: Prepare bundled dsh + Node
+        run: pnpm --filter @deepseek-ai/dsh-desktop run prepare-resources
+
+      - name: Package installer
+        working-directory: apps/desktop
+        run: pnpm exec electron-builder ${{ matrix.electron_args }} --publish never
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.name }}
+          path: ${{ matrix.artifact_glob }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Attach to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.artifact_glob }}
+          fail_on_unmatched_files: true

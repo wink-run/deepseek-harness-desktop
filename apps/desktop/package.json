@@ -7,7 +7,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/wink-run/deepseek-harness-desktop.git",
     "directory": "apps/desktop"
   },
   "type": "module",
@@ -20,9 +20,10 @@
   ],
   "scripts": {
     "build": "tsc -b && tsdown",
+    "prepare-resources": "node ./scripts/prepare-resources.mjs",
     "start": "electron .",
-    "pack": "pnpm run build && electron-builder --dir",
-    "dist": "pnpm run build && electron-builder"
+    "pack": "pnpm run build && pnpm run prepare-resources && electron-builder --dir",
+    "dist": "pnpm run build && pnpm run prepare-resources && electron-builder"
   },
   "license": "MIT",
   "dependencies": {
@@ -36,8 +37,8 @@
     "vitest": "^4.1.8"
   },
   "build": {
-    "appId": "com.deepseek.dsh",
-    "productName": "DeepSeek Harness",
+    "appId": "com.deepseek.dsh.desktop",
+    "productName": "DeepSeek Harness Desktop",
     "directories": {
       "output": "release"
     },
@@ -47,25 +48,19 @@
     ],
     "extraResources": [
       {
-        "from": "../cli/lib",
-        "to": "dsh-cli",
-        "filter": [
-          "**/*"
-        ]
+        "from": ".pack/dsh",
+        "to": "dsh"
       },
       {
-        "from": "../cli/config",
-        "to": "dsh-cli-config",
-        "filter": [
-          "**/*"
-        ]
-      },
+        "from": ".pack/node",
+        "to": "node"
+      }
+    ],
+    "publish": [
       {
-        "from": "../web/dist",
-        "to": "dsh-web-dist",
-        "filter": [
-          "**/*"
-        ]
+        "provider": "github",
+        "owner": "wink-run",
+        "repo": "deepseek-harness-desktop"
       }
     ],
     "mac": {
@@ -73,7 +68,8 @@
       "target": [
         "dmg",
         "zip"
-      ]
+      ],
+      "identity": null
     },
     "linux": {
       "target": [
@@ -85,6 +81,10 @@
       "target": [
         "nsis"
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     }
   }
 }

@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-Electron shell for the DeepSeek Harness browser UI. The main process starts `dsh web --port 0` under a system Node binary, waits for the readiness URL owned by [`dsh-web-app`](../../packages/bundle/web-app/README.md), and opens a native window at that loopback origin. Closing the window terminates the child. This reuses the shipped Web composition (HTTP carrier, plugin roster, frontend dist) without a separate IPC fetch carrier.
+Electron shell for the DeepSeek Harness browser UI. The main process starts `dsh web --port 0` under a system Node binary (development) or a bundled Node plus `pnpm deploy` tree (packaged installers), waits for the readiness URL owned by [`dsh-web-app`](../../packages/bundle/web-app/README.md), and opens a native window at that loopback origin. Closing the window terminates the child. This reuses the shipped Web composition (HTTP carrier, plugin roster, frontend dist) without a separate IPC fetch carrier.
 
 ## Run from source
 
@@ -20,10 +20,14 @@ pnpm run build
 pnpm --filter @deepseek-ai/dsh-desktop run dist
 ```
 
-Artifacts land in `apps/desktop/release/`. The packaged app still needs a system Node binary on `PATH` (or `npm_node_execpath`) because harness native addons are compiled for Node, not Electron's embedded runtime. Embedding a portable Node binary is deferred.
+`dist` runs [`scripts/prepare-resources.mjs`](scripts/prepare-resources.mjs) (deploys `@deepseek-ai/dsh` and downloads a platform Node into `.pack/`), then `electron-builder`. Artifacts land in `apps/desktop/release/`.
+
+### GitHub Releases
+
+Publishing a GitHub Release on [wink-run/deepseek-harness-desktop](https://github.com/wink-run/deepseek-harness-desktop) runs [`.github/workflows/desktop-release.yml`](../../.github/workflows/desktop-release.yml): it builds macOS (dmg/zip), Linux (AppImage), and Windows (nsis) installers on hosted runners and attaches them to that Release. You can also run the workflow manually via **Actions → Desktop Release**.
 
 ## Known Limitations and Deferred Work
 
 - **Loopback HTTP, not `file://` + IPC.** The [GUI layering note](../../.agents/notes/implemented/architecture/2026-07-19-gui-layering-and-rpc-protocol.md) reserves an IPC fetch carrier for Electron; this shell deliberately keeps the existing webserver so the desktop product ships without a second transport. An IPC carrier remains future work.
-- **System Node required.** The web child never runs under Electron's `process.execPath`, because Node-native addons (SQLite, PTY, sandboxes) do not load against Electron's ABI.
-- **Installer resources are partial.** `electron-builder` copies the CLI lib, agent-preset config, and web dist as extra resources for future self-contained boots; the current main process still resolves `@deepseek-ai/dsh` from the install graph / workspace.
+- **macOS artifacts are unsigned.** The release workflow sets `CSC_IDENTITY_AUTO_DISCOVERY=false`; Gatekeeper may require a right-click open until signing is configured.
+- **Installer size tracks the full `dsh` deploy.** Packaged apps embed a production `pnpm deploy` of the CLI plus Node, so native addons match the runner OS rather than Electron's ABI.
