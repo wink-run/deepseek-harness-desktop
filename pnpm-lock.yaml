@@ -358,10 +358,10 @@ importers:
       '@deepseek-ai/dsh':
         specifier: workspace:^
         version: link:../cli
+    devDependencies:
       electron:
         specifier: ^36.4.0
         version: 36.4.0
-    devDependencies:
       electron-builder:
         specifier: ^26.0.12
         version: 26.15.3(electron-builder-squirrel-windows@26.15.3)

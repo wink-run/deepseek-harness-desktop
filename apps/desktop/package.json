@@ -26,11 +26,12 @@
     "dist": "pnpm run build && pnpm run prepare-resources && electron-builder"
   },
   "license": "MIT",
+  "author": "DeepSeek AI",
   "dependencies": {
-    "@deepseek-ai/dsh": "workspace:^",
-    "electron": "^36.4.0"
+    "@deepseek-ai/dsh": "workspace:^"
   },
   "devDependencies": {
+    "electron": "^36.4.0",
     "electron-builder": "^26.0.12",
     "tsdown": "^0.21.2",
     "typescript": "^6.0.3",
