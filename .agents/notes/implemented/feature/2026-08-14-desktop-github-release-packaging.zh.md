@@ -6,11 +6,11 @@ Status: implemented
 
 ## Problem
 
-桌面 Electron 壳可以在本地构建，但本 fork 没有能在三端产出安装包并挂到 Release 的 GitHub Actions 路径。贡献者否则只能手工在三个操作系统上运行 `electron-builder`。
+桌面 Electron 壳可以在本地构建，但本 fork 没有能在 macOS／Windows 产出安装包并挂到 Release 的 GitHub Actions 路径。贡献者否则只能手工在这两个操作系统上运行 `electron-builder`。
 
 ## Decision
 
-[`.github/workflows/desktop-release.yml`](../../../../.github/workflows/desktop-release.yml) 在版本 tag 推送（`[0-9]*`）、`release: published` 与 `workflow_dispatch` 时运行。矩阵使用 `macos-latest`、`ubuntu-24.04` 与 `windows-latest`：安装工作区、构建 harness、运行 [`apps/desktop/scripts/prepare-resources.mjs`](../../../../apps/desktop/scripts/prepare-resources.mjs)（以 legacy `pnpm deploy` 部署 `@deepseek-ai/dsh`，并将固定的 Node 24 二进制放入 `apps/desktop/.pack/`），再对该 OS 执行 `electron-builder`。产物经 `actions/upload-artifact` 上传；在 tag 或 Release 事件下再由 `softprops/action-gh-release` 挂到该 Release。
+[`.github/workflows/desktop-release.yml`](../../../../.github/workflows/desktop-release.yml) 在版本 tag 推送（`[0-9]*`）、`release: published` 与 `workflow_dispatch` 时运行。矩阵使用 `macos-latest` 与 `windows-latest`：安装工作区、构建 harness、运行 [`apps/desktop/scripts/prepare-resources.mjs`](../../../../apps/desktop/scripts/prepare-resources.mjs)（以 legacy `pnpm deploy` 部署 `@deepseek-ai/dsh`，并将固定的 Node 24 二进制放入 `apps/desktop/.pack/`），再对该 OS 执行 `electron-builder`。产物经 `actions/upload-artifact` 上传；在 tag 或 Release 事件下再由 `softprops/action-gh-release` 挂到该 Release。
 
 打包后的启动从 `process.resourcesPath` 解析 Node 与 `dsh`（[`runtime-paths.ts`](../../../../apps/desktop/src/runtime-paths.ts)）；开发态仍使用工作区依赖与系统 Node。macOS 签名有意关闭（`CSC_IDENTITY_AUTO_DISCOVERY=false`，`mac.identity: null`）。
 

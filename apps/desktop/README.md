@@ -24,7 +24,7 @@ pnpm --filter @deepseek-ai/dsh-desktop run dist
 
 ### GitHub Releases
 
-Publishing a version tag (e.g. `0.1.0`) or a GitHub Release on [wink-run/deepseek-harness-desktop](https://github.com/wink-run/deepseek-harness-desktop) runs [`.github/workflows/desktop-release.yml`](../../.github/workflows/desktop-release.yml): it builds macOS (dmg/zip), Linux (AppImage), and Windows (nsis) installers on hosted runners and attaches them to that Release. You can also run the workflow manually via **Actions → Desktop Release**.
+Publishing a version tag (e.g. `0.1.0`) or a GitHub Release on [wink-run/deepseek-harness-desktop](https://github.com/wink-run/deepseek-harness-desktop) runs [`.github/workflows/desktop-release.yml`](../../.github/workflows/desktop-release.yml): it builds macOS (dmg/zip) and Windows (nsis) installers on hosted runners and attaches them to that Release. You can also run the workflow manually via **Actions → Desktop Release**.
 
 ## Known Limitations and Deferred Work
 

@@ -38,10 +38,6 @@ jobs:
             os: macos-latest
             electron_args: --mac
             artifact_glob: 'apps/desktop/release/*.{dmg,zip,yml,yaml,blockmap}'
-          - name: Linux
-            os: ubuntu-24.04
-            electron_args: --linux
-            artifact_glob: 'apps/desktop/release/*.{AppImage,yml,yaml}'
           - name: Windows
             os: windows-latest
             electron_args: --win

@@ -6,11 +6,11 @@ English | [中文](2026-08-14-desktop-github-release-packaging.zh.md)
 
 ## Problem
 
-The desktop Electron shell could be built locally, but this fork had no GitHub Actions path that produced installers and attached them to a Release. Contributors would otherwise hand-run `electron-builder` on three OSes.
+The desktop Electron shell could be built locally, but this fork had no GitHub Actions path that produced macOS / Windows installers and attached them to a Release. Contributors would otherwise hand-run `electron-builder` on those two OSes.
 
 ## Decision
 
-[`.github/workflows/desktop-release.yml`](../../../../.github/workflows/desktop-release.yml) runs on version tag pushes (`[0-9]*`), `release: published`, and `workflow_dispatch`. A matrix of `macos-latest`, `ubuntu-24.04`, and `windows-latest` installs the workspace, builds the harness, runs [`apps/desktop/scripts/prepare-resources.mjs`](../../../../apps/desktop/scripts/prepare-resources.mjs) (legacy `pnpm deploy` of `@deepseek-ai/dsh` plus a pinned Node 24 binary into `apps/desktop/.pack/`), then `electron-builder` for that OS. Artifacts upload with `actions/upload-artifact` and, on a tag or Release event, attach via `softprops/action-gh-release`.
+[`.github/workflows/desktop-release.yml`](../../../../.github/workflows/desktop-release.yml) runs on version tag pushes (`[0-9]*`), `release: published`, and `workflow_dispatch`. A matrix of `macos-latest` and `windows-latest` installs the workspace, builds the harness, runs [`apps/desktop/scripts/prepare-resources.mjs`](../../../../apps/desktop/scripts/prepare-resources.mjs) (legacy `pnpm deploy` of `@deepseek-ai/dsh` plus a pinned Node 24 binary into `apps/desktop/.pack/`), then `electron-builder` for that OS. Artifacts upload with `actions/upload-artifact` and, on a tag or Release event, attach via `softprops/action-gh-release`.
 
 Packaged launches resolve Node and `dsh` under `process.resourcesPath` ([`runtime-paths.ts`](../../../../apps/desktop/src/runtime-paths.ts)); development still uses the workspace dependency and system Node. macOS signing is deliberately off (`CSC_IDENTITY_AUTO_DISCOVERY=false`, `mac.identity: null`).
 

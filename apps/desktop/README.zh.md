@@ -24,7 +24,7 @@ pnpm --filter @deepseek-ai/dsh-desktop run dist
 
 ### GitHub Releases
 
-在 [wink-run/deepseek-harness-desktop](https://github.com/wink-run/deepseek-harness-desktop) 上推送版本 tag（如 `0.1.0`）或发布 GitHub Release 会触发 [`.github/workflows/desktop-release.yml`](../../.github/workflows/desktop-release.yml)：在托管 runner 上构建 macOS（dmg/zip）、Linux（AppImage）与 Windows（nsis）安装包并挂到该 Release。也可在 **Actions → Desktop Release** 手动运行。
+在 [wink-run/deepseek-harness-desktop](https://github.com/wink-run/deepseek-harness-desktop) 上推送版本 tag（如 `0.1.0`）或发布 GitHub Release 会触发 [`.github/workflows/desktop-release.yml`](../../.github/workflows/desktop-release.yml)：在托管 runner 上构建 macOS（dmg/zip）与 Windows（nsis）安装包并挂到该 Release。也可在 **Actions → Desktop Release** 手动运行。
 
 ## Known Limitations and Deferred Work
 
