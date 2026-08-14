@@ -6,16 +6,19 @@ name: E2E (real DeepSeek API)
 # https://api.deepseek.com (DEEPSEEK_BASE_URL is pinned to it explicitly so a
 # stray repo-root .env can't redirect the run).
 #
+# When DEEPSEEK_API_KEY_EXTERNAL is unset (common on forks without that secret),
+# the job is skipped entirely so push CI is not a false red. Upstream orgs that
+# configure the secret still run the suite; the preflight below remains as a
+# belt-and-suspenders check if the job somehow starts without a usable key.
+#
 # pull_request IS a trigger, but GitHub withholds repo secrets from BOTH forked
 # PRs and Dependabot PRs (the latter are same-repo, fork==false, but still
 # keyless). The job-level `if:` below skips the whole job for those untrusted
 # PRs. The Dependabot test keys on the PR AUTHOR (pull_request.user.login), not
 # github.actor (the run trigger) — a maintainer reopening a Dependabot PR would
-# make github.actor human while the PR is still keyless. When the job runs, the
-# secret is expected, so the preflight hard-fails if it's missing (a missing
-# secret would otherwise make the self-skipping suite report a false green). A
-# job skipped by a job-level `if:` reports as a SUCCESSFUL check, so this
-# workflow is safe to use as a required status check if desired.
+# make github.actor human while the PR is still keyless. A job skipped by a
+# job-level `if:` reports as a SUCCESSFUL check, so this workflow is safe to use
+# as a required status check if desired.
 #
 # SECURITY — NEVER change this trigger to `pull_request_target`. `pull_request`
 # checks out and runs the PR's HEAD code WITHOUT secrets for forks, which is what
@@ -55,11 +58,13 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     name: e2e
-    # Run on every trusted event. Skip untrusted PRs (forks + Dependabot) where
-    # the secret is withheld — they would otherwise hard-fail the preflight.
+    # Skip when the API secret is unset (forks without DEEPSEEK_API_KEY_EXTERNAL)
+    # and when the event is an untrusted PR (forks + Dependabot) where GitHub
+    # withholds secrets anyway. Skipped jobs report success for required checks.
     if: >-
-      github.event_name != 'pull_request'
-      || !(github.event.pull_request.head.repo.fork || github.event.pull_request.user.login == 'dependabot[bot]')
+      secrets.DEEPSEEK_API_KEY_EXTERNAL != ''
+      && (github.event_name != 'pull_request'
+      || !(github.event.pull_request.head.repo.fork || github.event.pull_request.user.login == 'dependabot[bot]'))
     # Bounded file parallelism (DSH_E2E_MAX_WORKERS), 120s/test, retry 2. 45m
     # still bounds retry storms against a slow API while the happy path fans out.
     timeout-minutes: 45

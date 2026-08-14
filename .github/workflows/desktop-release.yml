@@ -68,7 +68,12 @@ jobs:
 
       - name: Package installer
         working-directory: apps/desktop
-        run: pnpm exec electron-builder ${{ matrix.electron_args }} --publish never
+        env:
+          # pnpm's deps check honors NODE_ENV=production and strips electron-builder.
+          NODE_ENV: development
+          npm_config_production: 'false'
+        # Call the local bin directly — `pnpm exec` re-ran `install --production` on CI.
+        run: node ./node_modules/electron-builder/cli.js ${{ matrix.electron_args }} --publish never
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4

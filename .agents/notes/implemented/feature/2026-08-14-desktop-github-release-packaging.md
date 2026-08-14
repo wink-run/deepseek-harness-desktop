@@ -29,4 +29,4 @@ Packaged launches resolve Node and `dsh` under `process.resourcesPath` ([`runtim
 
 ## Consequences
 
-Creating a version tag (or Release) is the supported way to publish desktop installers. Workflow dispatch supports rehearsal without a tag. Installer size follows the full `dsh` production deploy. Signing and auto-update remain future work.
+Creating a version tag (or Release) is the supported way to publish desktop installers. Workflow dispatch supports rehearsal without a tag. Installer size follows the full `dsh` production deploy. Signing and auto-update remain future work. Real-API e2e is skipped when `DEEPSEEK_API_KEY_EXTERNAL` is unset so this fork's push CI is not a false red.

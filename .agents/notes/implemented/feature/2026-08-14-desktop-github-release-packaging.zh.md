@@ -29,4 +29,4 @@ Status: implemented
 
 ## Consequences
 
-创建版本 tag（或 Release）是发布桌面安装包的支持方式。`workflow_dispatch` 支持无 tag 的预演。安装包体积跟随完整的 `dsh` 生产 deploy。签名与自动更新仍属后续工作。
+创建版本 tag（或 Release）是发布桌面安装包的支持方式。`workflow_dispatch` 支持无 tag 的预演。安装包体积跟随完整的 `dsh` 生产 deploy。签名与自动更新仍属后续工作。未配置 `DEEPSEEK_API_KEY_EXTERNAL` 时跳过真实 API e2e，避免本 fork 的 push CI 假红。

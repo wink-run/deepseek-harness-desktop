@@ -53,13 +53,34 @@ async function download(url, dest) {
   await pipeline(response.body, createWriteStream(dest))
 }
 
+function resolvePnpmCli() {
+  // Windows GitHub Actions puts pnpm on PATH as pnpm.CMD; spawnSync('pnpm') is ENOENT.
+  if (process.platform === 'win32') {
+    const home = process.env.PNPM_HOME
+    if (home) {
+      for (const name of ['pnpm.CMD', 'pnpm.exe', 'pnpm.cmd']) {
+        const candidate = join(home, name)
+        if (existsSync(candidate)) return candidate
+      }
+    }
+    return 'pnpm.cmd'
+  }
+  return 'pnpm'
+}
+
 function prepareDsh() {
   rmSync(dshOut, { recursive: true, force: true })
   mkdirSync(packRoot, { recursive: true })
+  // shell:true on win32 so .cmd shims resolve the same way the runner shell does.
   execFileSync(
-    'pnpm',
+    resolvePnpmCli(),
     ['--filter', '@deepseek-ai/dsh', 'deploy', '--prod', '--legacy', dshOut],
-    { cwd: repoRoot, stdio: 'inherit' },
+    {
+      cwd: repoRoot,
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+      env: process.env,
+    },
   )
   if (!existsSync(join(dshOut, 'lib', 'bin.js'))) {
     throw new Error(`prepare-resources: missing ${join(dshOut, 'lib', 'bin.js')}`)
