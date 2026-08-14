@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Prepare Electron extraResources: a `pnpm deploy` of `@deepseek-ai/dsh` plus a
- * platform Node binary. Run from the repository root after `pnpm run build`.
+ * Prepare Electron extraResources: a `pnpm deploy` of `@deepseek-ai/dsh` plus the
+ * platform `node` executable only (not the full Node dist with npm/npx/corepack).
+ * Run from the repository root after `pnpm run build`.
  *
  * Usage: node apps/desktop/scripts/prepare-resources.mjs
  */
@@ -116,14 +117,16 @@ async function prepareNode() {
   }
 
   const extracted = join(staging, base)
-  if (!existsSync(extracted)) {
-    throw new Error(`prepare-resources: expected extracted tree ${extracted}`)
+  const extractedBinary = join(extracted, spec.binaryRel)
+  if (!existsSync(extractedBinary)) {
+    throw new Error(`prepare-resources: expected extracted binary ${extractedBinary}`)
   }
-  await cp(extracted, nodeOut, { recursive: true })
+  // Ship only the Node executable. Official dist trees ship npm/npx/corepack as
+  // relative symlinks that electron-builder / Gatekeeper paths break, and the
+  // desktop shell only needs `node` to run the bundled dsh bin.
   const binary = join(nodeOut, spec.binaryRel)
-  if (!existsSync(binary)) {
-    throw new Error(`prepare-resources: missing node binary ${binary}`)
-  }
+  mkdirSync(dirname(binary), { recursive: true })
+  await cp(extractedBinary, binary)
   if (process.platform !== 'win32') {
     await chmod(binary, 0o755)
   }
