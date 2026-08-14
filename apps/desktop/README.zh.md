@@ -20,7 +20,7 @@ pnpm run build
 pnpm --filter @deepseek-ai/dsh-desktop run dist
 ```
 
-`dist` 会运行 [`scripts/prepare-resources.mjs`](scripts/prepare-resources.mjs)（将 `@deepseek-ai/dsh` deploy 到 `.pack/` 并下载平台 Node），再执行 `electron-builder`。产物位于 `apps/desktop/release/`。
+`dist` 会运行 [`scripts/prepare-resources.mjs`](scripts/prepare-resources.mjs)（将 `@deepseek-ai/dsh` deploy 到 `.pack/runtime/`、物化外链、提升缺失 peer，并下载平台 Node），再由 `electron-builder` 复制为 `extraResources`。必须嵌套在 `runtime/` 下，否则 electron-builder 会丢掉顶层 `node_modules` 并导致安装后闪退。产物位于 `apps/desktop/release/`。
 
 ### GitHub Releases
 

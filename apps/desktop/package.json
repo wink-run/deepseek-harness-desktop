@@ -53,12 +53,8 @@
     ],
     "extraResources": [
       {
-        "from": ".pack/dsh",
-        "to": "dsh"
-      },
-      {
-        "from": ".pack/node",
-        "to": "node"
+        "from": ".pack/runtime",
+        "to": "."
       }
     ],
     "publish": [
@@ -70,7 +66,7 @@
     ],
     "mac": {
       "category": "public.app-category.developer-tools",
-      "icon": "build/icon.png",
+      "icon": "build/icon.icns",
       "target": [
         "dmg",
         "zip"

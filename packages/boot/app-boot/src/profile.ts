@@ -24,7 +24,7 @@
 
 import { createRequire } from 'node:module'
 import {
-  existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, symlinkSync, unlinkSync, writeFileSync,
+  existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, realpathSync, symlinkSync, unlinkSync, writeFileSync,
 } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import type { EntryOptions } from '@deepseek-ai/cordis-plugin-loader'
@@ -318,13 +318,19 @@ function normalizeShippedProfile(name: string, dir: string, manifest: ProfileMan
  * manifest. This is Node's own node_modules lookup order, so the result
  * matches what the Loader would import from the same anchor, and
  * `existsSync` follows the symlinks pnpm's isolated layout uses.
+ *
+ * The anchor is realpath'd first: a pnpm deploy tree exposes packages as
+ * top-level symlinks into `.pnpm/.../node_modules/@scope/name`, and walking
+ * parents of the symlink path misses sibling packages that only exist next
+ * to the realpath'd directory.
  */
 function packageDirFromAnchor(anchor: string, packageName: string): string | undefined {
   // resolve.paths returns null only for builtins, which no bundle name is.
   /* v8 ignore next */
-  for (const searchPath of createRequire(anchor).resolve.paths(packageName) ?? []) {
+  const realAnchor = realpathSync(anchor)
+  for (const searchPath of createRequire(realAnchor).resolve.paths(packageName) ?? []) {
     const candidate = join(searchPath, packageName)
-    if (existsSync(join(candidate, 'package.json'))) return candidate
+    if (existsSync(join(candidate, 'package.json'))) return realpathSync(candidate)
   }
   return undefined
 }

@@ -20,7 +20,7 @@ pnpm run build
 pnpm --filter @deepseek-ai/dsh-desktop run dist
 ```
 
-`dist` runs [`scripts/prepare-resources.mjs`](scripts/prepare-resources.mjs) (deploys `@deepseek-ai/dsh` and downloads a platform Node into `.pack/`), then `electron-builder`. Artifacts land in `apps/desktop/release/`.
+`dist` runs [`scripts/prepare-resources.mjs`](scripts/prepare-resources.mjs) (deploys `@deepseek-ai/dsh` into `.pack/runtime/`, materializes outbound links, hoists missing peers, and downloads a platform Node), then `electron-builder` copies that tree as `extraResources`. Nesting under `runtime/` is required so `dsh/node_modules` is not dropped by electron-builder's top-level `node_modules` filter (which otherwise crashes on launch). Artifacts land in `apps/desktop/release/`.
 
 ### GitHub Releases
 

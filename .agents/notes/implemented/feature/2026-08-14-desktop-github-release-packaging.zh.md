@@ -10,9 +10,9 @@ Status: implemented
 
 ## Decision
 
-[`.github/workflows/desktop-release.yml`](../../../../.github/workflows/desktop-release.yml) 在版本 tag 推送（`[0-9]*`）、`release: published` 与 `workflow_dispatch` 时运行。矩阵使用 `macos-latest` 与 `windows-latest`：安装工作区、构建 harness、运行 [`apps/desktop/scripts/prepare-resources.mjs`](../../../../apps/desktop/scripts/prepare-resources.mjs)（以 legacy `pnpm deploy` 部署 `@deepseek-ai/dsh`，并将固定的 Node 24 二进制放入 `apps/desktop/.pack/`），再对该 OS 执行 `electron-builder`。产物先从被 `.gitignore` 忽略的 `apps/desktop/release/` 拷到可上传目录（`upload-artifact` 会遵循 `.gitignore`），再经 `actions/upload-artifact` 上传；在 tag 或 Release 事件下再由 `softprops/action-gh-release` 挂到该 Release。
+[`.github/workflows/desktop-release.yml`](../../../../.github/workflows/desktop-release.yml) 在版本 tag 推送（`[0-9]*`）、`release: published` 与 `workflow_dispatch` 时运行。矩阵使用 `macos-latest` 与 `windows-latest`：安装工作区、构建 harness、运行 [`apps/desktop/scripts/prepare-resources.mjs`](../../../../apps/desktop/scripts/prepare-resources.mjs)（以 legacy `pnpm deploy` 部署 `@deepseek-ai/dsh`，并将固定的 Node 24 二进制放入 `apps/desktop/.pack/runtime/`），再对该 OS 执行 `electron-builder`。deploy 树必须嵌套在 `runtime/` 下，因为 electron-builder 的 `createFilter` 会丢掉相对 `extraResources.from` 的顶层 `node_modules`；否则安装后启动会因 `Cannot find package '@deepseek-ai/dsh-app-boot'` 闪退。deploy 之后脚本物化指向仓库外的 vendor 符号链接（如 cosmokit），再把缺失的 `@deepseek-ai/*` 提升到顶层 `node_modules`：优先链接 `.pnpm` 自有目录（保留 `zod` 等同级依赖），并对 deploy 未收录的 peer 包（如 `dsh-timeout`）从 monorepo 源码拷贝。prepare 会要求打包态 `dsh --help` 与短暂的 `dsh web --port 0` 冒烟打出就绪 URL，否则失败。产物先从被 `.gitignore` 忽略的 `apps/desktop/release/` 拷到可上传目录（`upload-artifact` 会遵循 `.gitignore`），再经 `actions/upload-artifact` 上传；在 tag 或 Release 事件下再由 `softprops/action-gh-release` 挂到该 Release。
 
-打包后的启动从 `process.resourcesPath` 解析 Node 与 `dsh`（[`runtime-paths.ts`](../../../../apps/desktop/src/runtime-paths.ts)）；开发态仍使用工作区依赖与系统 Node。macOS 签名有意关闭（`CSC_IDENTITY_AUTO_DISCOVERY=false`，`mac.identity: null`）。
+打包后的启动从 `process.resourcesPath` 解析 Node 与 `dsh`（[`runtime-paths.ts`](../../../../apps/desktop/src/runtime-paths.ts)）；开发态仍使用工作区依赖与系统 Node。打包态 cwd 默认为用户主目录（Finder 启动时常为 `/`）。启动失败会先弹出错误对话框再退出。macOS 签名有意关闭（`CSC_IDENTITY_AUTO_DISCOVERY=false`，`mac.identity: null`）。macOS 图标使用已提交的 `build/icon.icns`，打包时不必再下载 electron-builder 的 icons bundle。
 
 ## Verification
 

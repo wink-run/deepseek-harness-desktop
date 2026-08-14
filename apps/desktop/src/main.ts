@@ -4,7 +4,7 @@
  * @module @deepseek-ai/dsh-desktop/main
  */
 
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, dialog, shell } from 'electron'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { resolveDesktopRuntimePaths } from './runtime-paths.ts'
@@ -65,10 +65,12 @@ function openWindow(url: string): void {
  */
 async function boot(): Promise<void> {
   const runtime = resolveDesktopRuntimePaths(app.isPackaged, process.resourcesPath)
+  // Finder / dock launches often use cwd=/; home is a usable default workspace.
+  const cwd = app.isPackaged ? app.getPath('home') : process.cwd()
   const child = await spawnWeb({
     nodePath: runtime.nodePath,
     dshBin: runtime.dshBin,
-    cwd: process.cwd(),
+    cwd,
   })
   webChild = child
   openWindow(child.url)
@@ -76,7 +78,9 @@ async function boot(): Promise<void> {
 
 app.whenReady().then(() => {
   void boot().catch((error: unknown) => {
-    console.error(error instanceof Error ? error.message : error)
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(message)
+    dialog.showErrorBox('DeepSeek Harness Desktop failed to start', message)
     app.exit(1)
   })
 })
